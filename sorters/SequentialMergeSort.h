@@ -1,3 +1,3 @@
-void SequentialMergeSort(int* input, int* output, int min, int maxExclusive);
+void SequentialMergeSort(int* input, int* output, int length);
 
-void SequentialMerge(int* input, int* output, int min, int mid, int maxExclusive);
+void SequentialMerge(int* sorted, int* output, int mid, int maxExclusive);

@@ -1,32 +1,33 @@
 #include "SequentialMergeSort.h"
 
-void SequentialMergeSort(int* input, int* output, int min, int maxExclusive){
-    if (maxExclusive-min <= 1){
-        return;
+void SequentialMergeSort(int* input, int* output, int length){
+    if (length == 1){
+        output[0] = input[0];
     }
     // can't overflow, in case we are using really big arrays
-    int mid = min+(maxExclusive-min)/2;
-    SequentialMergeSort(input, output, min, mid);
-    SequentialMergeSort(input, output, min, maxExclusive);
-    SequentialMerge(input, output, min, mid, maxExclusive);
+    int mid = length/2;
+    int* extra = (int*)malloc(length*sizeof(int));
+    SequentialMergeSort(input, extra, mid);
+    SequentialMergeSort(input+mid, extra+mid, length-mid);
+    SequentialMerge(extra, output, mid, length);
 }
 
-void SequentialMerge(int* input, int* output, int min, int mid, int maxExclusive){
-    int lowIdx = min;
+void SequentialMerge(int* sorted, int* output, int mid, int maxExclusive){
+    int lowIdx = 0;
     int highIdx = mid;
     int i;
-    for (i = mid; i < maxExclusive; i++){
+    for (i = 0; i < maxExclusive; i++){
         if (lowIdx >= mid){
-            output[i] = input[highIdx];
+            output[i] = sorted[highIdx];
             highIdx++;
         }else if (highIdx >= maxExclusive){
-            output[i] = input[lowIdx];
+            output[i] = sorted[lowIdx];
             lowIdx++;
-        }else if (input[lowIdx] < input[highIdx]){
-            output[i] = input[lowIdx];
+        }else if (sorted[lowIdx] < sorted[highIdx]){
+            output[i] = sorted[lowIdx];
             lowIdx++;
         }else{
-            output[i] = input[highIdx];
+            output[i] = sorted[highIdx];
             highIdx++;     
         }
     }
