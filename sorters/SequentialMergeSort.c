@@ -3,6 +3,7 @@
 void SequentialMergeSort(int* input, int* output, int length){
     if (length == 1){
         output[0] = input[0];
+        return;
     }
     // can't overflow, in case we are using really big arrays
     int mid = length/2;
@@ -10,6 +11,7 @@ void SequentialMergeSort(int* input, int* output, int length){
     SequentialMergeSort(input, extra, mid);
     SequentialMergeSort(input+mid, extra+mid, length-mid);
     SequentialMerge(extra, output, mid, length);
+    free(extra);
 }
 
 void SequentialMerge(int* sorted, int* output, int mid, int maxExclusive){
