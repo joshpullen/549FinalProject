@@ -2,7 +2,7 @@
 #include "SequentialMergeSort.h"
 #include <cilk/cilk.h>
 
-#define sequentialThreshold 1000
+#define sequentialThreshold 50
 
 void ParallelMergeSort(int* input, int* output, int length){
     if (length < sequentialThreshold){
