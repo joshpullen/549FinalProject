@@ -1,9 +1,12 @@
 #include "ParallelMergeSort.h"
+#include "SequentialMergeSort.h"
 #include <cilk/cilk.h>
 
+#define sequentialThreshold 1000
+
 void ParallelMergeSort(int* input, int* output, int length){
- if (length == 1){
-        output[0] = input[0];
+    if (length < sequentialThreshold){
+        SequentialMergeSort(input, output, length);
         return;
     }
     // can't overflow, in case we are using really big arrays
