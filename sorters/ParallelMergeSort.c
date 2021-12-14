@@ -49,21 +49,3 @@ void ParallelMerge(int* A, int* B, int* output, int Alen, int Blen){
         }
     }
 }
-
-int BinarySearch(int* array, int value, int length){
-    if (length == 0){
-        return 0;
-    }
-    if (length == 1){
-        if (value < array[0]){
-            return 0;
-        }
-        return 1;
-    }
-    int mid = length/2;
-    if (value < array[mid]){
-        return BinarySearch(array, value, mid);
-    }else{
-        return mid+BinarySearch(array+mid, value, length-mid);
-    }
-}

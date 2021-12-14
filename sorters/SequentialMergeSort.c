@@ -34,3 +34,18 @@ void SequentialMerge(int* sorted, int* output, int mid, int maxExclusive){
         }
     }
 }
+
+int BinarySearch(int* array, int value, int length){
+    
+    int low = 0;
+    int high = length-1;
+    while (low <= high){
+        int mid = (low+high)/2;
+        if (array[mid] >= value){
+            high = mid-1;
+        }else{
+            low=mid+1;
+        }
+    }
+    return low;
+}

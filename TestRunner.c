@@ -7,6 +7,7 @@
 #include "sorters/KWayMergeSort/heap.c"
 #include "sorters/QuickSort/SequentialQuickSort.c"
 #include "sorters/QuickSort/ParallelQuickSort.c"
+#include "sorters/COSort/SequentialCOSort.c"
 
 // Check if arr is sorted
 int check(int *arr, int n) {
@@ -54,6 +55,7 @@ int main(){
     }
 
 
+
     printf("\nMulti-way: \n");
     // k can be equals to [2..n]
     int kWaySorted[n], k = 7;
@@ -63,6 +65,7 @@ int main(){
     printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
     if (check(sorted, n) && check(parsorted, n) && check(kWaySorted, n)) printf("Correct\n");
     else printf("Error\n");
+
 
 
     printf("Sequential Quicksort:\n");
@@ -91,7 +94,28 @@ int main(){
     }else{
         printf("Incorrect.\n");
     }
-    printf("%d", pqSorted[100]);
+
+
+
+    printf("Sequential COSort:\n");
+    tic = clock();
+    int* output = COSort(array, n, 0);
+    toc = clock();
+    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    if (check(output, n) == 1){
+        printf("Correct.\n");
+    }else{
+        printf("Incorrect.\n");
+        // for (int i = 0; i < n; i++){
+        //     printf("%d, ", pqSorted[i]);
+        // }
+        // printf("\n");
+        // for (int i = 0; i < n; i++){
+        //     printf("%d, ", output[i]);
+        // }
+        // printf("\n");
+    }
+    
 
     return 0;
 }
