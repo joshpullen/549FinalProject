@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../SequentialMergeSort.c"
+#include "../ParallelMergeSort.c"
 #include "SequentialCOSort.c"
+#include "ParallelCOSort.c"
 
 
 int check(int* array, int n){
@@ -28,7 +30,7 @@ int checkSequentialMergesort(){
         int val = array[i];
         int found = 0;
         for (int j = 0; j < n; j++){
-            if (output[j] = val){
+            if (output[j] == val){
                 found = 1;
             }
         }
@@ -48,7 +50,6 @@ int checkPrefixSum(){
         array[1][i] = 2*i;
     }
     int* summed = prefixSum(array, 2, 10);
-    printf("Contents of array returned:\n");
     for (int i = 0; i < 10; i++){
         if (summed[i] != prefix[i]){
             
@@ -59,6 +60,31 @@ int checkPrefixSum(){
         }
     }
     return 0;
+}
+
+int checkParallelPrefixSum(){
+    int testsToRun = 100;
+    int ret = 0;
+    for (int i = 0; i < testsToRun; i++){
+        printf("Running test %d/%d\n", i+1, testsToRun);
+        int n = rand()%500+10;
+        int m = rand()%50 + 5;
+        int array[m][n];
+        for (int j = 0; j < m; j++){
+            for (int k = 0; k < n; k++){
+                array[j][k] = rand()%1000;
+            }
+        }
+        int* expected = prefixSum(array, m, n);
+        int* actual = Parallel_prefixSum(array, m, n);
+        for (int j = 0; j < m*n; j++){
+            if (expected[j] != actual[j]){
+                printf("Error on row %d, column %d. Expected %d but was %d.", j/n, j%n, expected[j], actual[j]);
+                ret = 1;
+            }
+        }
+    }
+    return ret;
 }
 
 int checkTranspose(){
@@ -138,7 +164,7 @@ int checkMtoL_transpose(){
     int h = 5;
     int* L_T = (int*) malloc(sizeof(int)*h*(h+1));
     // h rows, h+1 columns
-    MtoL_transpose(&expectedSplits, L_T, 0, h+1, 0, h, h);
+    MtoL_transpose(&expectedSplits, L_T, 0, h+1, 0, h, h, h);
     int expected[][6] = {{1, 3, 2, 2, 0, 0}, {1, 0, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, {2, 0, 1, 1, 2, 0}, {1, 2, 1, 2, 3, 0}};
     for (int i = 0; i < 5; i++){
         for (int j = 0; j < 6; j++){
@@ -193,7 +219,7 @@ int checkTransposeAndSum(){
     }
     int h = 5;
     int* L_T = (int*) malloc(sizeof(int)*h*(h+1));
-    MtoL_transpose(actualSplits, L_T, 0, h+1, 0, h, h);
+    MtoL_transpose(actualSplits, L_T, 0, h+1, 0, h, h, h);
     int* summed = prefixSum(L_T, 5, 6);
     int expected[][6] = {{0, 1, 4, 6, 8, 8}, {0, 1, 1, 2, 2, 2}, {0, 0, 0, 0, 0, 0}, {0, 2, 2, 3, 4, 6}, {0, 1, 3, 4, 6, 9}};
     for (int i = 0; i < 5; i++){
@@ -222,7 +248,7 @@ int checkSort(){
     free(actual);
     int h = 5;
     int* L_T = (int*) malloc(sizeof(int)*h*(h+1));
-    MtoL_transpose(M, L_T, 0, h+1, 0, h, h);
+    MtoL_transpose(M, L_T, 0, h+1, 0, h, h, h);
     int* O = prefixSum(L_T, 5, 6);
     int* O_T = (int*) malloc(sizeof(int)*h*(h+1));
     transpose(O, O_T, 0, h, 0, h+1, h, h+1);
@@ -286,13 +312,14 @@ int checkSort(){
 
 int main(){
     srand(1);
-    printf("Sequential Mergesort test: %d\n", checkSequentialMergesort());
-    printf("Errors in prefixSum: %d\n", checkPrefixSum());
-    printf("Errors in transpose: %d\n", checkTranspose());
-    printf("Errors in split: %d\n", checkSplit());
-    printf("Errors in Binary search: %d\n", checkBinarySearch());
-    printf("Errors in MtoL_T: %d\n", checkMtoL_transpose());
-    printf("Error in sum after transpose: %d\n", checkTransposeAndSum());
-    printf("Error in sort: %d\n", checkSort());
+    // printf("Sequential Mergesort test: %d\n", checkSequentialMergesort());
+    // printf("Errors in prefixSum: %d\n", checkPrefixSum());
+    // printf("Errors in transpose: %d\n", checkTranspose());
+    // printf("Errors in split: %d\n", checkSplit());
+    // printf("Errors in Binary search: %d\n", checkBinarySearch());
+    // printf("Errors in MtoL_T: %d\n", checkMtoL_transpose());
+    // printf("Error in sum after transpose: %d\n", checkTransposeAndSum());
+    // printf("Error in sort: %d\n", checkSort());
+    printf("Error in parallel prefix sum: %d\n", checkParallelPrefixSum());
     return 0;
 }

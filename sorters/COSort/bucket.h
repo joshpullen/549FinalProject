@@ -10,7 +10,9 @@ struct Bucket {
 
 struct Bucket createBucket(int* array, int offset, int length);
 
-struct Bucket* createBuckets(int* bucketOffsets, int* baseArray, int n);
+struct Bucket* createBuckets(int* bucketLengths, int* baseArray, int n);
+
+struct Bucket* Parallel_createBuckets(int* bucketLengths, int* bucketOffsets, int* baseArray, int n);
 
 void freeBuckets(struct Bucket* b, int numBuckets);
 

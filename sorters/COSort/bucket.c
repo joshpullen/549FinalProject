@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <cilk/cilk.h>
 #include "bucket.h"
 
 struct Bucket createBucket(int* array, int offset, int length){
@@ -16,6 +17,15 @@ struct Bucket* createBuckets(int* bucketLengths, int* baseArray, int n){
     for (int i = 0; i < h; i++){
         buckets[i] = createBucket(baseArray, offset, bucketLengths[i]);
         offset += bucketLengths[i];
+    }
+    return buckets;
+}
+
+struct Bucket* Parallel_createBuckets(int* bucketLengths, int* bucketOffsets, int* baseArray, int n){
+    int h = ceil(sqrt(n));
+    struct Bucket* buckets = (struct Bucket*) malloc(sizeof(struct Bucket)*h);
+    cilk_for (int i = 0; i < h; i++){
+        buckets[i] = createBucket(baseArray, bucketOffsets[i], bucketLengths[i]);
     }
     return buckets;
 }

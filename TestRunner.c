@@ -1,7 +1,7 @@
-<<<<<<< HEAD
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <cilk/cilk.h>
 #include "sorters/SequentialMergeSort.c"
 #include "sorters/ParallelMergeSort.c"
 #include "sorters/KWayMergeSort/KWayMergeSort.c"
@@ -9,12 +9,21 @@
 #include "sorters/QuickSort/SequentialQuickSort.c"
 #include "sorters/QuickSort/ParallelQuickSort.c"
 #include "sorters/COSort/SequentialCOSort.c"
+#include "sorters/COSort/ParallelCOSort.c"
 
 // Check if arr is sorted
 int check(int *arr, int n) {
-    int i = 0;
     for (int i = 0; i < n - 1; ++ i) {
         if (arr[i] > arr[i + 1]) return 0;
+    }
+    return 1;
+}
+
+int checkArraysEqual(int *A, int *B, int n){
+    for (int i = 0; i < n; i++){
+        if (A[i]!=B[i]){
+            return 0;
+        }
     }
     return 1;
 }
@@ -100,121 +109,38 @@ int main(){
 
     printf("Sequential COSort:\n");
     tic = clock();
-    int* output = COSort(array, n, 0);
+    int* output = COSort(array, n);
     toc = clock();
     printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
     if (check(output, n) == 1){
         printf("Correct.\n");
     }else{
         printf("Incorrect.\n");
-        // for (int i = 0; i < n; i++){
-        //     printf("%d, ", pqSorted[i]);
-        // }
-        // printf("\n");
-        // for (int i = 0; i < n; i++){
-        //     printf("%d, ", output[i]);
-        // }
-        // printf("\n");
+    }
+    printf("Contents check:\n");
+    if (checkArraysEqual(output, pqSorted, n) == 1){
+        printf("Correct contents.\n");
+    }else{
+        printf("Incorrect contents.\n");
     }
     
 
-    return 0;
-=======
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include "sorters/SequentialMergeSort.c"
-#include "sorters/ParallelMergeSort.c"
-#include "sorters/KWayMergeSort/KWayMergeSort.c"
-#include "sorters/KWayMergeSort/heap.c"
-#include "sorters/QuickSort/SequentialQuickSort.c"
-#include "sorters/QuickSort/ParallelQuickSort.c"
-
-// Check if arr is sorted
-int check(int *arr, int n) {
-    int i = 0;
-    for (int i = 0; i < n - 1; ++ i) {
-        if (arr[i] > arr[i + 1]) return 0;
-    }
-    return 1;
-}
-
-int main(){
-    int n = 10000;
-    int array[n];
-    time_t t;
-    srand((unsigned) time(&t));
-
-    int i;
-    for (i = 0; i < n; i++){
-      array[i] = rand();
-    }
-    int sorted[n];
-    clock_t tic = clock();
-    SequentialMergeSort(array, sorted, n);
-    clock_t toc = clock();
-    printf("Array size: %d\n", n);
-    printf("Sorted Sequentially: \n");
+    printf("Parallel COSort:\n");
+    tic = clock();
+    int* parOutput = Parallel_COSort(array, n);
+    toc = clock();
     printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    if (check(sorted, n) == 1){
+    if (check(parOutput, n) == 1){
         printf("Correct.\n");
     }else{
         printf("Incorrect.\n");
     }
-
-
-    printf("\nParallel: \n");
-    int parsorted[n];
-    tic = clock();
-    ParallelMergeSort(array, parsorted, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    if (check(parsorted, n) == 1){
-        printf("Correct.\n");
+    printf("Contents check:\n");
+    if (checkArraysEqual(parOutput, pqSorted, n) == 1){
+        printf("Correct contents.\n");
     }else{
-        printf("Incorrect.\n");
+        printf("Incorrect contents.\n");
     }
-
-
-    printf("\nMulti-way: \n");
-    // k can be equals to [2..n]
-    int kWaySorted[n], k = 7;
-    tic = clock();
-    kWayMergeSort(array, kWaySorted, k, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    if (check(sorted, n) && check(parsorted, n) && check(kWaySorted, n)) printf("Correct\n");
-    else printf("Error\n");
-
-
-    printf("Sequential Quicksort:\n");
-    int sqSorted[n];
-    memcpy(sqSorted, array, sizeof(sqSorted));
-    tic = clock();
-    sequentialQuickSort(sqSorted, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    if (check(sqSorted, n) == 1){
-        printf("Correct.\n");
-    }else{
-        printf("Incorrect.\n");
-    }
-
-
-    printf("Parallel Quicksort:\n");
-    int pqSorted[n];
-    memcpy(pqSorted, array, sizeof(pqSorted));
-    tic = clock();
-    sequentialQuickSort(pqSorted, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    if (check(pqSorted, n) == 1){
-        printf("Correct.\n");
-    }else{
-        printf("Incorrect.\n");
-    }
-    printf("%d", pqSorted[100]);
 
     return 0;
->>>>>>> 553f3e9b4fbe748d0313487c860c8039c6d614fc
 }
