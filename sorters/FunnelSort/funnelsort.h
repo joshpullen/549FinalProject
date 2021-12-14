@@ -16,7 +16,7 @@ funnel * create_funnel(void *in, void *out, size_t nmemb, size_t size, cmp_t cmp
 
 void clean_funnel(funnel *f);
 
-void * get_head_funnel(funnel *f);
+void * get_funnel_head(funnel *f);
 
 void fill_funnel(funnel *f);
 

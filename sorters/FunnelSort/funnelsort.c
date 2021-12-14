@@ -51,7 +51,7 @@ void clean_funnel(funnel *f) {
     }
 }
 
-void * get_head_funnel(funnel *f) {
+void * get_funnel_head(funnel *f) {
     // get the head of the buffer
     if (f->index < f->nmemb) {
         return (void *)((char *)f->out + f->size * f->index);
