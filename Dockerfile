@@ -12,7 +12,7 @@ RUN apt-add-repository ppa:wsmoses/tapir-toolchain && \
     apt-get install -y tapirclang-5.0 libcilkrts5
 
 # install gdb and valgrind for debugging
-RUN apt install gdb valgrind
+RUN apt install -y gdb valgrind
 
 # install update alternatives
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 10 \
