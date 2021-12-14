@@ -13,13 +13,13 @@ Windows (make sure docker container backend is on WSL):
 ```
 > docker build . -t cilk
 > docker run -v %cd%:/test -it cilk
-$ clang -fcilkplus TestRunner.c -o test.exe
+$ clang -fcilkplus TestRunner.c -o test.exe -lm
 $ ./test.exe
 ```
 Linux:
 ```
 $ docker build . -t cilk
 $ docker run -v $(pwd):/test -it cilk
-$ clang -fcilkplus TestRunner.c -o test.exe
+$ clang -fcilkplus TestRunner.c -o test.exe -lm
 $ ./test.exe
 ```
