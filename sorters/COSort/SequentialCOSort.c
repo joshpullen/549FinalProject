@@ -133,10 +133,7 @@ void stackWarning(){
     // do nothing
 }
 
-int* COSort(int* A, int n, int depth){
-    if (depth > 10){
-        stackWarning();
-    }
+int* COSort(int* A, int n){
     // large enough threshold that log_2(n) < sqrt(n)
     if (n <= 20){
         int* B = (int*) malloc(n*sizeof(int));
@@ -149,37 +146,17 @@ int* COSort(int* A, int n, int depth){
     int* S = malloc(sizeof(int)*n);
     // int S[h][h];
     for (int i = 0; i < n/h; i++){
-        // SequentialMergeSort(A+i*h, S+i*h, h);
-        int* sorted = COSort(A+i*h, h, depth+1);
+        int* sorted = COSort(A+i*h, h);
         memcpy(S+i*h, sorted, h*sizeof(int));
         free(sorted);
     }
     if (n % h != 0){
-        // SequentialMergeSort(A+(n-(n%h)), S+(n-(n%h)), n%h);
-        int* sorted = COSort(A+(n-(n%h)), n%h, depth+1);
+        int* sorted = COSort(A+(n-(n%h)), n%h);
         memcpy(S+(n-(n%h)), sorted, (n%h)*sizeof(int));
         free(sorted);
     }
-    // for (int i = 0; i < n; i++){
-    //     int val = A[i];
-    //     int found = 0;
-    //     for (int j = 0; j < n; j++){
-    //         if (S[j] == val){
-    //             found = 1;
-    //         }
-    //     }
-    //     if (found == 0){
-    //         printf("Warning: input element %d, at index %d, not found in array S at depth %d.\n", val, i, depth);
-    //     }
-    // }
-    // fflush(stdout);
     // get pivots
     int* pivots = getPivots(S, n);
-    // printf("Pivots:\n");
-    // for (int i = 0; i < h-1; i++){
-    //     printf("%d, ", pivots[i]);
-    // }
-    // printf("\n");
     // generate the array M
     int* M = (int*) malloc(sizeof(int)*numS*h*2);
     // int M[h][h][2];
@@ -194,7 +171,7 @@ int* COSort(int* A, int n, int depth){
         free(spl);
     }
     // free pivots once we are done with it
-    // free(pivots);
+    free(pivots);
     // transpose the correct things from M to get L_T
     int* L_T = (int*)malloc(sizeof(int)*(numS+1)*h);
     // int L_T[h][numS+1];
@@ -229,37 +206,14 @@ int* COSort(int* A, int n, int depth){
     struct Bucket* B = createBuckets(O_T+numS*h, bucketArray, n);
     free(O_T);
     B_transpose(S, B, T, 0, 0, numS, h, h);
-// it do be stack overflowing tho :flushed:
     free(T);
     free(S);
-    // for (int i = 0; i < n; i++){
-    //     int val = S[i];
-    //     int found = 0;
-    //     for (int j = 0; j < n; j++){
-    //         if (bucketArray[j] == val){
-    //             found = 1;
-    //         }
-    //     }
-    //     if (found == 0){
-    //         printf("Warning: input element %d, at index %d, not found in bucket array at depth %d.\n", val, i, depth);
-    //     }
-    // }
-    // fflush(stdout);
-    // printf("bucket array contents:\n");
-    // for (int i = 0; i < n; i++){
-    //     printf("%d, ", bucketArray[i]);
-    // }
-    // printf("\n");
-    // fflush(stdout);
     int* output = malloc(n*sizeof(int));
     for (int i = 0; i < h; i++){
         if (B[i].length > 0){            
-            // sometimes B[i].array is uninitialized/empty
-            // despite B_transpose having written to every spot
-            int* recursiveOutput = COSort(B[i].array + B[i].offset, B[i].length, depth+1);
+            int* recursiveOutput = COSort(B[i].array + B[i].offset, B[i].length);
             memcpy(output + B[i].offset, recursiveOutput, B[i].length*sizeof(int));
             free(recursiveOutput);
-            // SequentialMergeSort(B[i].array+B[i].offset, output+B[i].offset, B[i].length);
         }
     }
     freeBuckets(B, h);

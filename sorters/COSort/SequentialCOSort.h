@@ -1,6 +1,6 @@
 #include "bucket.h"
 
-int* COSort(int* input, int n, int depth);
+int* COSort(int* input, int n);
 
 void B_transpose(int*  S, struct Bucket* B, int* T, int i_s, int i_b, int sCount, int bCount, int h);
 
