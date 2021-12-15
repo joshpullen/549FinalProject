@@ -11,7 +11,6 @@
 #include "sorters/QuickSort/ParallelQuickSort.c"
 #include "sorters/COSort/SequentialCOSort.c"
 #include "sorters/COSort/ParallelCOSort.c"
-#include "sorters/QuickSort/ParallelQuickSort1.c"
 
 
 
@@ -47,8 +46,16 @@ int main(int argc, char *argv[]){
     double elapsed;
 
     int i;
+    // seed array with distinct integers
     for (i = 0; i < n; i++){
-      array[i] = rand();
+        array[i] = i;
+    }
+    // shuffle array into all permutations with equal probability
+    for (int i = 0; i < n; i++){
+        int swapIndex = ((int)rand())%(n-(i))+i;
+        int temp = array[i];
+        array[i] = array[swapIndex];
+        array[swapIndex] = temp;
     }
     int *sorted;
     sorted = (int*)malloc(sizeof(int) * n);
@@ -121,22 +128,11 @@ int main(int argc, char *argv[]){
     }else{
         printf("Incorrect.\n");
     }
-
-    printf("Parallel Quicksort1:\n");
-    int *pqSorted1;
-    pqSorted1 = (int*)malloc(sizeof(int) * n);
-    memcpy(pqSorted1, array, sizeof(int) * n);
-    clock_gettime(CLOCK_MONOTONIC, &tic);
-    parallelQuickSort1(pqSorted1, n);
-    clock_gettime(CLOCK_MONOTONIC, &toc);
-    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
-    if (check(pqSorted1, n) == 1){
-        printf("Correct.\n");
+    if (checkArraysEqual(sorted, pqSorted, n) == 1){
+        printf("Array contents correct.\n");
     }else{
-        printf("Incorrect.\n");
+        printf("Array contents incorrect.\n");
     }
-
-
 
     printf("Sequential COSort:\n");
     clock_gettime(CLOCK_MONOTONIC, &tic);
@@ -149,7 +145,7 @@ int main(int argc, char *argv[]){
         printf("Incorrect.\n");
     }
     printf("Contents check:\n");
-    if (checkArraysEqual(output, pqSorted, n) == 1){
+    if (checkArraysEqual(output, sorted, n) == 1){
         printf("Correct contents.\n");
     }else{
         printf("Incorrect contents.\n");
@@ -167,7 +163,7 @@ int main(int argc, char *argv[]){
         printf("Incorrect.\n");
     }
     printf("Contents check:\n");
-    if (checkArraysEqual(parOutput, pqSorted, n) == 1){
+    if (checkArraysEqual(parOutput, sorted, n) == 1){
         printf("Correct contents.\n");
     }else{
         printf("Incorrect contents.\n");

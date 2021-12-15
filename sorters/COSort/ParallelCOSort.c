@@ -168,12 +168,12 @@ int* Parallel_COSort(int* A, int n){
     cilk_for (int i = 0; i < n/h; i++){
         int* sorted = Parallel_COSort(A+i*h, h);
         memcpy(S+i*h, sorted, h*sizeof(int));
-        free(sorted);
+        // free(sorted);
     }
     if (n % h != 0){
         int* sorted = Parallel_COSort(A+(n-(n%h)), n%h);
         memcpy(S+(n-(n%h)), sorted, (n%h)*sizeof(int));
-        free(sorted);
+        // free(sorted);
     }
 
     // get pivots
@@ -184,16 +184,16 @@ int* Parallel_COSort(int* A, int n){
     cilk_for (int i = 0; i < n/h; i++){
         int* spl = Parallel_split(S+i*h, pivots, h, h-1);
         memcpy(M+i*h*2, spl, sizeof(int)*h*2);
-        free(spl);
+        // free(spl);
     }
     if (n%h != 0){
         int* spl = Parallel_split(S+(n-(n%h)), pivots, n%h, h-1);
         memcpy(M+(numS-1)*h*2, spl, sizeof(int)*2*h);
-        free(spl);
+        // free(spl);
     }
 
     // free pivots once we are done with it
-    free(pivots);
+    // free(pivots);
 
     // transpose the write lengths from M to get L_T
     int* L_T = (int*)malloc(sizeof(int)*(numS+1)*h);
@@ -204,7 +204,7 @@ int* Parallel_COSort(int* A, int n){
     int* O = Parallel_prefixSum(L_T, h, numS+1);
 
     // free L_T 
-    free(L_T);
+    // free(L_T);
 
     // Transpose O back to be in the same shape as M
     int* O_T = (int*) malloc(sizeof(int)*h*(numS+1));
@@ -212,7 +212,7 @@ int* Parallel_COSort(int* A, int n){
     cilk_sync;
 
     // free O now that it has been transposed
-    free(O);
+    // free(O);
 
     // construct complete metadata array T. 
     // T[i][j] = {x,y,z}, where:
@@ -232,7 +232,7 @@ int* Parallel_COSort(int* A, int n){
     }
     
     // free M now that T has been constructed
-    free(M);
+    // free(M);
 
     // initialize buckets with correct lengths and offsets
     int* bucketArray = malloc(n*sizeof(int));
@@ -240,15 +240,15 @@ int* Parallel_COSort(int* A, int n){
     struct Bucket* B = Parallel_createBuckets(O_T+numS*h, bucketOffsets, bucketArray, n);
 
     // free bucket lengths
-    free(O_T);
+    // free(O_T);
 
     // copy elements from S into their corresponding buckets
     Parallel_B_transpose(S, B, T, 0, 0, numS, h, h);
     cilk_sync;
 
     // free T and S now that elements have been copied
-    free(T);
-    free(S);
+    // free(T);
+    // free(S);
 
     // recursively sort buckets
     int* output = malloc(n*sizeof(int));
@@ -261,8 +261,8 @@ int* Parallel_COSort(int* A, int n){
         }
     }
     // free buckets before returning
-    freeBuckets(B, h);
-    free(bucketArray);
+    // freeBuckets(B, h);
+    // free(bucketArray);
 
     // return sorted output
     return output;
