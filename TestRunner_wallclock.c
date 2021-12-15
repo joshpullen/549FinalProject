@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -11,6 +12,8 @@
 #include "sorters/COSort/SequentialCOSort.c"
 #include "sorters/COSort/ParallelCOSort.c"
 #include "sorters/QuickSort/ParallelQuickSort1.c"
+
+
 
 // Check if arr is sorted
 int check(int *arr, int n) {
@@ -40,18 +43,21 @@ int main(int argc, char *argv[]){
     time_t t;
     srand((unsigned) time(&t));
 
+    struct timespec tic, toc;
+    double elapsed;
+
     int i;
     for (i = 0; i < n; i++){
       array[i] = rand();
     }
     int *sorted;
     sorted = (int*)malloc(sizeof(int) * n);
-    clock_t tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     SequentialMergeSort(array, sorted, n);
-    clock_t toc = clock();
+    clock_gettime(CLOCK_MONOTONIC, &toc);
     printf("Array size: %d\n", n);
     printf("Sorted Sequentially: \n");
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(sorted, n) == 1){
         printf("Correct.\n");
     }else{
@@ -62,10 +68,10 @@ int main(int argc, char *argv[]){
     printf("\nParallel: \n");
     int *parsorted;
     parsorted = (int*)malloc(sizeof(int) * n);
-    tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     ParallelMergeSort(array, parsorted, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &toc);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(parsorted, n) == 1){
         printf("Correct.\n");
     }else{
@@ -78,10 +84,10 @@ int main(int argc, char *argv[]){
     // k can be equals to [2..n]
     int *kWaySorted, k = 7;
     kWaySorted = (int*)malloc(sizeof(int) * n);
-    tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     kWayMergeSort(array, kWaySorted, k, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &toc);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(sorted, n) && check(parsorted, n) && check(kWaySorted, n)) printf("Correct\n");
     else printf("Error\n");
 
@@ -91,10 +97,10 @@ int main(int argc, char *argv[]){
     int *sqSorted;
     sqSorted = (int*)malloc(sizeof(int) * n);
     memcpy(sqSorted, array, sizeof(int) * n);
-    tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     sequentialQuickSort(sqSorted, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &toc);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(sqSorted, n) == 1){
         printf("Correct.\n");
     }else{
@@ -106,10 +112,10 @@ int main(int argc, char *argv[]){
     int *pqSorted;
     pqSorted = (int*)malloc(sizeof(int) * n);
     memcpy(pqSorted, array, sizeof(int) * n);
-    tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     parallelQuickSort(pqSorted, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &toc);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(pqSorted, n) == 1){
         printf("Correct.\n");
     }else{
@@ -120,10 +126,10 @@ int main(int argc, char *argv[]){
     int *pqSorted1;
     pqSorted1 = (int*)malloc(sizeof(int) * n);
     memcpy(pqSorted1, array, sizeof(int) * n);
-    tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     parallelQuickSort1(pqSorted1, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &toc);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(pqSorted1, n) == 1){
         printf("Correct.\n");
     }else{
@@ -133,10 +139,10 @@ int main(int argc, char *argv[]){
 
 
     printf("Sequential COSort:\n");
-    tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     int* output = COSort(array, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &toc);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(output, n) == 1){
         printf("Correct.\n");
     }else{
@@ -151,10 +157,10 @@ int main(int argc, char *argv[]){
     
 
     printf("Parallel COSort:\n");
-    tic = clock();
+    clock_gettime(CLOCK_MONOTONIC, &tic);
     int* parOutput = Parallel_COSort(array, n);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &toc);
+    printf("Time taken: %f seconds\n", (toc.tv_sec-tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / 1000000000.0);
     if (check(parOutput, n) == 1){
         printf("Correct.\n");
     }else{
