@@ -77,31 +77,31 @@ void fill_funnel(funnel *f) {
     void *head1, *head2;
     size_t index = 0;
 
-    head1 = get_head_funnel(f->sub_funnels[0]);
-    head2 = get_head_funnel(f->sub_funnels[1]);
+    head1 = get_funnel_head(f->sub_funnels[0]);
+    head2 = get_funnel_head(f->sub_funnels[1]);
 
     // merge step
     while (index1 < nmemb1 && index2 < nmemb2) {
         if (f->cmp(head1, head2) < 0) {
             memcpy((char *)f->out + index * f->size, head1, f->size);
-            head1 = get_head_funnel(f->sub_funnels[0]);
+            head1 = get_funnel_head(f->sub_funnels[0]);
             index1++;
         }
         else {
             memcpy((char *)f->out + index * f->size, head2, f->size);
-            head2 = get_head_funnel(f->sub_funnels[1]);
+            head2 = get_funnel_head(f->sub_funnels[1]);
             index2++;
         }
         index++;
     }
     while (index1 < nmemb1) {
-        head1 = get_head_funnel(f->sub_funnels[0]);
+        head1 = get_funnel_head(f->sub_funnels[0]);
         memcpy((char *)f->out + index * f->size, head1, f->size);
         index1++;
         index++;
     }
     while (index2 < nmemb2) {
-        head2 = get_head_funnel(f->sub_funnels[1]);
+        head2 = get_funnel_head(f->sub_funnels[1]);
         memcpy((char *)f->out + index * f->size, head2, f->size);
         index2++;
         index++;
