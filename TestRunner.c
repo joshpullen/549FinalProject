@@ -10,7 +10,7 @@
 #include "sorters/QuickSort/ParallelQuickSort.c"
 #include "sorters/COSort/SequentialCOSort.c"
 #include "sorters/COSort/ParallelCOSort.c"
-#include "sorters/QuickSort/ParallelQuickSort1.c"
+#include "sorters/FunnelSort/funnelsort.c"
 
 // Check if arr is sorted
 int check(int *arr, int n) {
@@ -29,14 +29,9 @@ int checkArraysEqual(int *A, int *B, int n){
     return 1;
 }
 
-int main(int argc, char *argv[]){
-    if (argc != 2) {
-        printf("Usage: %s <length of array>\n", argv[0]);
-        return 1;
-    }
-    int n = atoi(argv[1]);
-    int *array;
-    array = (int*)malloc(sizeof(int) * n);
+int main(){
+    int n = 10000;
+    int array[n];
     time_t t;
     srand((unsigned) time(&t));
 
@@ -44,8 +39,7 @@ int main(int argc, char *argv[]){
     for (i = 0; i < n; i++){
       array[i] = rand();
     }
-    int *sorted;
-    sorted = (int*)malloc(sizeof(int) * n);
+    int sorted[n];
     clock_t tic = clock();
     SequentialMergeSort(array, sorted, n);
     clock_t toc = clock();
@@ -60,8 +54,7 @@ int main(int argc, char *argv[]){
 
 
     printf("\nParallel: \n");
-    int *parsorted;
-    parsorted = (int*)malloc(sizeof(int) * n);
+    int parsorted[n];
     tic = clock();
     ParallelMergeSort(array, parsorted, n);
     toc = clock();
@@ -76,8 +69,7 @@ int main(int argc, char *argv[]){
 
     printf("\nMulti-way: \n");
     // k can be equals to [2..n]
-    int *kWaySorted, k = 7;
-    kWaySorted = (int*)malloc(sizeof(int) * n);
+    int kWaySorted[n], k = 7;
     tic = clock();
     kWayMergeSort(array, kWaySorted, k, n);
     toc = clock();
@@ -88,9 +80,8 @@ int main(int argc, char *argv[]){
 
 
     printf("Sequential Quicksort:\n");
-    int *sqSorted;
-    sqSorted = (int*)malloc(sizeof(int) * n);
-    memcpy(sqSorted, array, sizeof(int) * n);
+    int sqSorted[n];
+    memcpy(sqSorted, array, sizeof(sqSorted));
     tic = clock();
     sequentialQuickSort(sqSorted, n);
     toc = clock();
@@ -103,11 +94,10 @@ int main(int argc, char *argv[]){
 
 
     printf("Parallel Quicksort:\n");
-    int *pqSorted;
-    pqSorted = (int*)malloc(sizeof(int) * n);
-    memcpy(pqSorted, array, sizeof(int) * n);
+    int pqSorted[n];
+    memcpy(pqSorted, array, sizeof(pqSorted));
     tic = clock();
-    parallelQuickSort(pqSorted, n);
+    sequentialQuickSort(pqSorted, n);
     toc = clock();
     printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
     if (check(pqSorted, n) == 1){
@@ -116,20 +106,19 @@ int main(int argc, char *argv[]){
         printf("Incorrect.\n");
     }
 
-    printf("Parallel Quicksort1:\n");
-    int *pqSorted1;
-    pqSorted1 = (int*)malloc(sizeof(int) * n);
-    memcpy(pqSorted1, array, sizeof(int) * n);
+
+    printf("Funnelsort:\n");
+    int fsSorted[n];
+    memcpy(fsSorted, array, sizeof(fsSorted));
     tic = clock();
-    parallelQuickSort1(pqSorted1, n);
+    funnel_sort(fsSorted, n, sizeof(int), comparator);
     toc = clock();
     printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    if (check(pqSorted1, n) == 1){
+    if (check(fsSorted, n) == 1){
         printf("Correct.\n");
     }else{
         printf("Incorrect.\n");
     }
-
 
 
     printf("Sequential COSort:\n");
@@ -166,6 +155,7 @@ int main(int argc, char *argv[]){
     }else{
         printf("Incorrect contents.\n");
     }
+
 
     return 0;
 }
