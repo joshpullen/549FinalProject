@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../SequentialMergeSort.c"
-#include "../ParallelMergeSort.c"
+#include "../MergeSort/SequentialMergeSort.c"
+#include "../MergeSort/ParallelMergeSort.c"
 #include "SequentialCOSort.c"
 #include "ParallelCOSort.c"
 

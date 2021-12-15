@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <cilk/cilk.h>
-#include "sorters/SequentialMergeSort.c"
-#include "sorters/ParallelMergeSort.c"
+#include "sorters/MergeSort/SequentialMergeSort.c"
+#include "sorters/MergeSort/ParallelMergeSort.c"
 #include "sorters/KWayMergeSort/KWayMergeSort.c"
 #include "sorters/KWayMergeSort/heap.c"
 #include "sorters/QuickSort/SequentialQuickSort.c"

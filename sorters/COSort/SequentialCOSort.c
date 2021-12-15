@@ -3,7 +3,7 @@
 #include <math.h>
 #include <string.h>
 #include "SequentialCOSort.h"
-#include "../SequentialMergeSort.h"
+#include "../MergeSort/SequentialMergeSort.h"
 #include "bucket.c"
 
 

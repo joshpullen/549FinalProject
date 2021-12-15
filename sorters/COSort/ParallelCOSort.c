@@ -4,8 +4,8 @@
 #include <string.h>
 #include <cilk/cilk.h>
 #include "ParallelCOSort.h"
-#include "../ParallelMergeSort.h"
-#include "../SequentialMergeSort.h"
+#include "../MergeSort/ParallelMergeSort.h"
+#include "../MergeSort/SequentialMergeSort.h"
 #include "bucket.h"
 
 // compute prefix sum over each row of the input, where input is a rows by cols matrix

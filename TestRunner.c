@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <time.h>
 #include <cilk/cilk.h>
-#include "sorters/SequentialMergeSort.c"
-#include "sorters/ParallelMergeSort.c"
+#include "sorters/MergeSort/SequentialMergeSort.c"
+#include "sorters/MergeSort/ParallelMergeSort.c"
 #include "sorters/KWayMergeSort/KWayMergeSort.c"
 #include "sorters/KWayMergeSort/heap.c"
 #include "sorters/QuickSort/SequentialQuickSort.c"
 #include "sorters/QuickSort/ParallelQuickSort.c"
 #include "sorters/COSort/SequentialCOSort.c"
 #include "sorters/COSort/ParallelCOSort.c"
-#include "sorters/FunnelSort/funnelsort.c"
+// #include "sorters/FunnelSort/funnelsort.c"
 
 // Check if arr is sorted
 int check(int *arr, int n) {
@@ -97,7 +97,7 @@ int main(){
     int pqSorted[n];
     memcpy(pqSorted, array, sizeof(pqSorted));
     tic = clock();
-    sequentialQuickSort(pqSorted, n);
+    parallelQuickSort(pqSorted, n);
     toc = clock();
     printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
     if (check(pqSorted, n) == 1){
@@ -107,18 +107,18 @@ int main(){
     }
 
 
-    printf("Funnelsort:\n");
-    int fsSorted[n];
-    memcpy(fsSorted, array, sizeof(fsSorted));
-    tic = clock();
-    funnel_sort(fsSorted, n, sizeof(int), comparator);
-    toc = clock();
-    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    if (check(fsSorted, n) == 1){
-        printf("Correct.\n");
-    }else{
-        printf("Incorrect.\n");
-    }
+    // printf("Funnelsort:\n");
+    // int fsSorted[n];
+    // memcpy(fsSorted, array, sizeof(fsSorted));
+    // tic = clock();
+    // funnel_sort(fsSorted, n, sizeof(int), comparator);
+    // toc = clock();
+    // printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    // if (check(fsSorted, n) == 1){
+    //     printf("Correct.\n");
+    // }else{
+    //     printf("Incorrect.\n");
+    // }
 
 
     printf("Sequential COSort:\n");
@@ -132,7 +132,7 @@ int main(){
         printf("Incorrect.\n");
     }
     printf("Contents check:\n");
-    if (checkArraysEqual(output, pqSorted, n) == 1){
+    if (checkArraysEqual(output, sorted, n) == 1){
         printf("Correct contents.\n");
     }else{
         printf("Incorrect contents.\n");
@@ -150,7 +150,7 @@ int main(){
         printf("Incorrect.\n");
     }
     printf("Contents check:\n");
-    if (checkArraysEqual(parOutput, pqSorted, n) == 1){
+    if (checkArraysEqual(parOutput, sorted, n) == 1){
         printf("Correct contents.\n");
     }else{
         printf("Incorrect contents.\n");
