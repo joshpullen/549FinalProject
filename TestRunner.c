@@ -10,6 +10,7 @@
 #include "sorters/QuickSort/ParallelQuickSort.c"
 #include "sorters/COSort/SequentialCOSort.c"
 #include "sorters/COSort/ParallelCOSort.c"
+#include "sorters/FunnelSort/funnelsort.c"
 
 // Check if arr is sorted
 int check(int *arr, int n) {
@@ -106,6 +107,19 @@ int main(){
     }
 
 
+    printf("Funnelsort:\n");
+    int fsSorted[n];
+    memcpy(fsSorted, array, sizeof(fsSorted));
+    tic = clock();
+    funnel_sort(fsSorted, n, sizeof(int), comparator);
+    toc = clock();
+    printf("Time taken: %f seconds\n", (double)(toc-tic)/CLOCKS_PER_SEC);
+    if (check(fsSorted, n) == 1){
+        printf("Correct.\n");
+    }else{
+        printf("Incorrect.\n");
+    }
+
 
     printf("Sequential COSort:\n");
     tic = clock();
@@ -141,6 +155,7 @@ int main(){
     }else{
         printf("Incorrect contents.\n");
     }
+
 
     return 0;
 }
