@@ -26,8 +26,5 @@ int return_index_of_least(funnel *f);
 
 void fill_funnel(funnel *f);
 
-<<<<<<< HEAD
+
 void funnel_sort(void *arr, int nmemb, size_t size, cmp_t cmp);
-=======
-void funnel_sort(void *arr, int nmemb, size_t size, cmp_t cmp);
->>>>>>> cf37754f7cfb6c2ff3230cfdf6c8bb912d731c2b
