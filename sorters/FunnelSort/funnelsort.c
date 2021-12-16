@@ -1,122 +1,142 @@
-/* Adopted from https://github.com/prokaktus/funnelsort and adjusted accordingly */
+/* Adopted from https://github.com/Shmelnick/Funnelsort and adjusted accordingly */
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define L 64
+#include <math.h>
+#define L 64 // cache-line size
 #include "funnelsort.h"
 
 int comparator(const void *a, const void *b) {
     return (*(int *)a < *(int *)b ? -1 : 1);
 }
 
-funnel * create_funnel(void *in, void *out, size_t nmemb, size_t size, cmp_t cmp) {
-    funnel *f = (funnel *)malloc(sizeof(funnel));
+funnel *create_funnel(void *arr, int size, size_t nmemb, cmp_t cmp)
+{
+	// initialize funnel
+	funnel *f = (funnel *)malloc(sizeof(funnel));
+	f->size = size;
+	f->begin_sort_ptr = arr;
+	f->num_subarr = 0;
+	f->nmemb = nmemb;
+	f->cmp = cmp;
+	f->buff = malloc(L); // fixed buffer length
+	f->stream_size = size;
+	f->num_ele_buff = 0;	   // initialize the buffer to be empty
+	f->tail = f->buff;		   // tail points to the first element in the buffer
+	f->head = f->buff + nmemb; // position the head of the buffer so that when writing
+							   // to the buffer, the head and tail would match
 
-    f->out = out;
-    f->nmemb = nmemb;
-    f->size = size; 
-    f->cmp = cmp;
-    f->in = in;
-    f->index = 0;
+	if ((f->nmemb) * size <= L)
+	{ // base case, we reached a leaf node -> write the elements and sort them
+		memcpy(f->buff, f->begin_sort_ptr, f->size * nmemb);
+		qsort(f->buff, f->size, nmemb, cmp);
+		// adjust pointers
+		f->head = f->buff;
+		f->tail = f->buff + (size - 1) * nmemb;
+		f->num_ele_buff = size;
+	}
+	else
+	{
+		int subarr_length = (int)floor(pow(size, 2 / 3.0)); // each subarray has length n^(2/3)
+		// In the pseudocode we split an array with size n into n^(1/3) subarrays
+		// here we need to round it so that the number of subarrays is an integer
+		f->num_subarr = (int)ceil((double)size / subarr_length);
+		int n_right = size - subarr_length * (f->num_subarr - 1);
+		f->sub_funnels = (funnel **)malloc(sizeof(funnel *) * f->num_subarr);
 
-    if ((f->nmemb) * size <= L) { // base case
-        f->sub_funnels[0] = NULL;
-        f->sub_funnels[1] = NULL;
-    } else { // recursive step
-        size_t nmemb_left = nmemb / 2;
-        size_t nmemb_right = nmemb - nmemb_left;
-        void *out_left = malloc(nmemb_left * f->size);
-        void *out_right = malloc(nmemb_right * f->size);
-        // create sub-funnels
-        f->sub_funnels[0] = create_funnel(in, out_left, nmemb_left, f->size, cmp);
-        f->sub_funnels[1] = create_funnel((char *)in + nmemb_left * size, out_right,
-                                 nmemb_right, f->size, cmp);
-    }
-    return f;
+		int i;
+		for (i = 0; i < f->num_subarr - 1; i++) {
+			f->sub_funnels[i] = create_funnel(f->begin_sort_ptr + subarr_length * i * nmemb, subarr_length, nmemb, cmp);
+		}
+
+		f->sub_funnels[i] = create_funnel(f->begin_sort_ptr + subarr_length * i * nmemb, n_right, nmemb, cmp);
+	}
+
+	return f;
 }
 
-void clean_funnel(funnel *f) {
-    // free funnels memory
-    if (f) {
-        if (f->out) {
-            free(f->out);
-        }
-        if (f->sub_funnels[0]) {
-            clean_funnel(f->sub_funnels[0]);
-        } 
-        if (f->sub_funnels[1]) {
-            clean_funnel(f->sub_funnels[1]);
-        }
-        free(f);
-    }
+void *pop_buffer(funnel *f)
+{
+	void *pop_ele = f->head; // pop the head
+	if (f->head == f->buff + ((L / f->nmemb) - 1) * f->nmemb) {
+		f->head = f->buff; // shift head pointer
+	} else {
+		f->head += f->nmemb; // shift head pointer
+	}
+	
+	f->stream_size -= 1;
+	f->num_ele_buff -= 1;
+	return pop_ele;
 }
 
-void * get_funnel_head(funnel *f) {
-    // get the head of the buffer
-    if (f->index < f->nmemb) {
-        return (void *)((char *)f->out + f->size * f->index);
-    }
-    return NULL;
+void push_buffer(funnel *f, void *val_ptr)
+{
+	// append the input value to the tail of the funnel
+	if (f->tail == f->buff + ((L / f->nmemb) - 1) * f->nmemb) {
+		f->tail = f->buff; // shift tail pointer
+	} else {
+		f->tail += f->nmemb; // shift tail pointer
+	}
+		
+	memcpy(f->tail, val_ptr, f->nmemb);
+	f->num_ele_buff += 1;
 }
 
-void fill_funnel(funnel *f) {
-    // base case, sort the elements in the funnel
-    if (f->sub_funnels[0] == NULL || f->sub_funnels[1] == NULL) { 
-        qsort(f->in, f->nmemb, f->size, f->cmp);
-        memcpy(f->out, f->in, f->nmemb * f->size);
-        return;
-    }
-    // recursive calls to fill the buffers 
-    fill_funnel(f->sub_funnels[0]);
-    fill_funnel(f->sub_funnels[1]);
-    
-    size_t index1 = f->sub_funnels[0]->index; 
-    size_t nmemb1 = f->sub_funnels[0]->nmemb;
-    size_t index2 = f->sub_funnels[1]->index;
-    size_t nmemb2 = f->sub_funnels[1]->nmemb;
-    void *head1, *head2;
-    size_t index = 0;
-
-    head1 = get_funnel_head(f->sub_funnels[0]);
-    head2 = get_funnel_head(f->sub_funnels[1]);
-
-    // merge step
-    while (index1 < nmemb1 && index2 < nmemb2) {
-        if (f->cmp(head1, head2) < 0) {
-            memcpy((char *)f->out + index * f->size, head1, f->size);
-            head1 = get_funnel_head(f->sub_funnels[0]);
-            index1++;
-        }
-        else {
-            memcpy((char *)f->out + index * f->size, head2, f->size);
-            head2 = get_funnel_head(f->sub_funnels[1]);
-            index2++;
-        }
-        index++;
-    }
-    while (index1 < nmemb1) {
-        head1 = get_funnel_head(f->sub_funnels[0]);
-        memcpy((char *)f->out + index * f->size, head1, f->size);
-        index1++;
-        index++;
-    }
-    while (index2 < nmemb2) {
-        head2 = get_funnel_head(f->sub_funnels[1]);
-        memcpy((char *)f->out + index * f->size, head2, f->size);
-        index2++;
-        index++;
-    }
-    return;
+int return_index_of_least(funnel *f)
+{
+	// iterate over all subarrays and find the one that has the smallest dereferenced
+	// value of head pointer
+	int min_ind = -1;
+	int i;
+	for (i = 0; i < f->num_subarr; i++)
+	{
+		if (f->sub_funnels[i]->num_ele_buff > 0)
+		{
+			if (min_ind == -1)
+				min_ind = i;
+			if (f->cmp(f->sub_funnels[i]->head, f->sub_funnels[min_ind]->head) < 0)
+				min_ind = i;
+		}
+	}
+	return min_ind;
 }
 
-void funnel_sort(void *array, size_t nmemb, size_t size, cmp_t cmp) {
-    void *sorted = malloc(size * nmemb);
-    funnel *f = create_funnel(array, sorted, nmemb, size, cmp);
-    if (!f) {
-        printf("Error in create_funnel!\n");
-        return;
-    }
-    fill_funnel(f);
-    memcpy(array, sorted, size * nmemb);
-    clean_funnel(f);
+void fill_funnel(funnel *f)
+{
+	// keep filling the buffer until it's full
+	while (f->num_ele_buff < (int)(L / f->nmemb) && f->num_ele_buff < f->stream_size)
+	{
+		int i;
+		for (i = 0; i < f->num_subarr; i++)
+		{
+			if (f->sub_funnels[i]->num_subarr > 0 && f->sub_funnels[i]->num_ele_buff == 0 &&
+				f->sub_funnels[i]->stream_size != 0)
+			{
+				fill_funnel(f->sub_funnels[i]);
+			}
+		}
+
+		// after subbuffers are updated, there's at least one that is not empty
+		// we iterate through all buffer heads and pick the one with the smallest value
+		i = return_index_of_least(f);
+		push_buffer(f, pop_buffer(f->sub_funnels[i]));
+	}
+}
+
+void funnel_sort(void *arr, int size, size_t nmemb, cmp_t cmp)
+{
+	void *sorted = malloc(nmemb * size);
+	int ptr = 0;
+	funnel *f = create_funnel(arr, size, nmemb, cmp);
+
+	do
+	{
+		fill_funnel(f);
+		while (f->num_ele_buff > 0)
+		{
+			memcpy(sorted + nmemb * ptr++, pop_buffer(f), nmemb);
+		}
+	} while (f->stream_size > 0);
+
+	memcpy(arr, sorted, size * nmemb);
 }
